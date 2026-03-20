@@ -57,6 +57,7 @@ src/
 - **Trailing whitespace**: Trimmed
 - **Final newline**: Yes
 - **Maximum line width**: 100 characters (Prettier `printWidth`)
+- **CSS/SCSS**: Use SCSS with BEM methodology and 'sora-' prefix for class names
 
 ### JavaScript
 
@@ -98,6 +99,33 @@ src/
 
 - The project is currently plain JavaScript; no TypeScript is configured.
 - JSDoc comments are encouraged for public APIs and complex functions.
+
+### CSS/SCSS Guidelines
+
+- **Preprocessor**: Use SCSS (Sass) for all styles
+- **File naming**: Component styles should be scoped with `<style lang="scss" scoped>`
+- **BEM methodology**: Follow Block-Element-Modifier naming convention
+- **Prefix**: Use `sora-` prefix for all CSS class names
+- **Nesting**: Use SCSS nesting for better readability (max 3 levels deep)
+- **Variables**: Define colors, spacing, breakpoints in SCSS variables (when centralized)
+- **Example structure**:
+
+  ```scss
+  .sora-block {
+    // Block styles
+
+    &__element {
+      // Element styles
+
+      &--modifier {
+        // Modifier styles
+      }
+    }
+  }
+  ```
+
+- **Responsive design**: Use mobile-first approach with SCSS mixins/media queries
+- **Current example**: See `src/renderer/src/App.vue` for reference implementation
 
 ## ESLint Configuration
 
