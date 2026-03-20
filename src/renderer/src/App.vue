@@ -1,25 +1,57 @@
 <script setup>
-import { Message } from '@element-plus/icons-vue'
+import { ref } from 'vue'
+import { Message, Globe } from '@element-plus/icons-vue'
+import { useI18n } from 'vue-i18n'
+
+const { t, locale } = useI18n()
+const languages = [
+  { value: 'en', label: 'English' },
+  { value: 'vi', label: 'Tiếng Việt' }
+]
+const selectedLanguage = ref(locale.value)
 
 const handleGmailClick = () => {
   console.log('Gmail button clicked')
   // TODO: Implement Gmail authentication/connection
+}
+
+const changeLanguage = (lang) => {
+  locale.value = lang
+  selectedLanguage.value = lang
 }
 </script>
 
 <template>
   <div class="sora-home">
     <div class="sora-home__header">
-      <h1 class="sora-home__title">Sora Mail</h1>
-      <p class="sora-home__subtitle">Your unified email client</p>
+      <div class="sora-home__header-content">
+        <h1 class="sora-home__title">Sora Mail</h1>
+        <p class="sora-home__subtitle">{{ t('appSubtitle') }}</p>
+      </div>
+      <div class="sora-home__language-switcher">
+        <el-select
+          v-model="selectedLanguage"
+          class="sora-home__language-select"
+          size="small"
+          :prefix-icon="Globe"
+          @change="changeLanguage"
+        >
+          <el-option
+            v-for="lang in languages"
+            :key="lang.value"
+            :label="lang.label"
+            :value="lang.value"
+          />
+        </el-select>
+      </div>
     </div>
 
     <div class="sora-home__content">
       <el-card class="sora-home__providers-card" shadow="hover">
         <template #header>
           <div class="sora-home__card-header">
-            <h2 class="sora-home__card-title">Connect Your Email Account</h2>
-            <p class="sora-home__card-description">Select an email provider to get started</p>
+            <h2 class="sora-home__card-title">{{ t('connectAccount') }}</h2>
+            <p class="sora-home__card-description">{{ t('selectProvider') }}</p>
           </div>
         </template>
 
@@ -32,19 +64,19 @@ const handleGmailClick = () => {
             @click="handleGmailClick"
           >
             <div class="sora-home__provider-button-content">
-              <div class="sora-home__provider-name">Gmail</div>
-              <div class="sora-home__provider-description">Google Mail Service</div>
+              <div class="sora-home__provider-name">{{ t('gmail') }}</div>
+              <div class="sora-home__provider-description">{{ t('gmailDescription') }}</div>
             </div>
           </el-button>
 
           <div class="sora-home__coming-soon">
-            <el-tag type="info" size="large">More providers coming soon</el-tag>
+            <el-tag type="info" size="large">{{ t('comingSoon') }}</el-tag>
           </div>
         </div>
 
         <div class="sora-home__card-footer">
           <p class="sora-home__footer-note">
-            Sora Mail securely connects to your email accounts using OAuth 2.0
+            {{ t('secureNote') }}
           </p>
         </div>
       </el-card>
@@ -52,15 +84,14 @@ const handleGmailClick = () => {
       <div class="sora-home__info">
         <el-card class="sora-home__info-card" shadow="never">
           <div class="sora-home__info-content">
-            <h3>About Sora Mail</h3>
+            <h3>{{ t('aboutTitle') }}</h3>
             <p>
-              A modern desktop email client built with Electron and Vue.js. Currently supports Gmail
-              with more providers on the way.
+              {{ t('aboutDescription') }}
             </p>
             <div class="sora-home__features">
-              <el-tag type="success" size="small">Secure</el-tag>
-              <el-tag type="warning" size="small">Fast</el-tag>
-              <el-tag type="info" size="small">Cross-platform</el-tag>
+              <el-tag type="success" size="small">{{ t('secure') }}</el-tag>
+              <el-tag type="warning" size="small">{{ t('fast') }}</el-tag>
+              <el-tag type="info" size="small">{{ t('crossPlatform') }}</el-tag>
             </div>
           </div>
         </el-card>
@@ -68,7 +99,7 @@ const handleGmailClick = () => {
     </div>
 
     <div class="sora-home__footer">
-      <p class="sora-home__version-info">Version 1.0.0 • Built with Electron & Vue.js</p>
+      <p class="sora-home__version-info">{{ t('versionInfo') }}</p>
     </div>
   </div>
 </template>
@@ -85,8 +116,23 @@ const handleGmailClick = () => {
   margin: 0 auto;
 
   &__header {
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 3rem;
+    width: 100%;
+  }
+
+  &__header-content {
+    text-align: left;
+  }
+
+  &__language-switcher {
+    flex-shrink: 0;
+  }
+
+  &__language-select {
+    width: 140px;
   }
 
   &__title {
@@ -249,6 +295,20 @@ const handleGmailClick = () => {
       flex-wrap: wrap;
       justify-content: center;
     }
+
+    &__header {
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    &__header-content {
+      text-align: center;
+    }
+
+    &__language-select {
+      width: 120px;
+    }
   }
 
   @media (max-width: 480px) {
@@ -271,6 +331,10 @@ const handleGmailClick = () => {
 
     &__provider-description {
       font-size: 0.85rem;
+    }
+
+    &__language-select {
+      width: 110px;
     }
   }
 }
