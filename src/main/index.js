@@ -3,11 +3,52 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
+// Load environment variables
+import dotenv from 'dotenv'
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
+import { existsSync } from 'fs'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+// Determine environment and load appropriate .env files
+const env = process.env.NODE_ENV || 'development'
+const envFile = env === 'production' ? '.env.production' : '.env.dev'
+const rootDir = join(__dirname, '../../')
+
+// Load base environment file
+const baseEnvPath = join(rootDir, envFile)
+if (existsSync(baseEnvPath)) {
+  dotenv.config({ path: baseEnvPath })
+  console.log(`📁 Loaded environment from: ${envFile}`)
+} else {
+  console.warn(`⚠️  Environment file not found: ${envFile}`)
+}
+
+// Load local overrides (optional)
+const localEnvPath = join(rootDir, '.env.local')
+if (existsSync(localEnvPath)) {
+  dotenv.config({ path: localEnvPath, override: true })
+  console.log('📁 Loaded local overrides from: .env.local')
+}
+
+// Log loaded environment (for debugging)
+console.log(`🚀 Environment: ${env}`)
+console.log(`📁 App name: ${process.env.APP_NAME || 'Not set'}`)
+
 function createWindow() {
-  // Create the browser window.
+  // Create the browser window with config from environment
+  const width = parseInt(process.env.WINDOW_WIDTH) || 900
+  const height = parseInt(process.env.WINDOW_HEIGHT) || 670
+  const minWidth = parseInt(process.env.WINDOW_MIN_WIDTH) || 800
+  const minHeight = parseInt(process.env.WINDOW_MIN_HEIGHT) || 600
+
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width,
+    height,
+    minWidth,
+    minHeight,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),

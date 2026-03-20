@@ -150,6 +150,35 @@ Run `npm run lint` to check for issues; fix automatically with `npm run format` 
 - **Sandbox**: Disabled (`sandbox: false`) in main window webPreferences.
 - **Asset imports**: Use the `?asset` suffix for static resources (e.g., `import icon from '../../resources/icon.png?asset'`).
 
+## Environment Variables Configuration
+
+The project uses `dotenv` to manage environment variables in the main process.
+
+### Environment Files
+
+- `.env.sample` – Template with example variables (committed)
+- `.env.dev` – Development environment (git‑ignored)
+- `.env.production` – Production environment (git‑ignored)
+- `.env.local` – Local overrides (git‑ignored, optional)
+
+### Loading Logic (in `src/main/index.js`)
+
+1. Detects `NODE_ENV` (default: `'development'`)
+2. Loads `.env.production` if `NODE_ENV === 'production'`, otherwise `.env.dev`
+3. Optionally loads `.env.local` for personal overrides (with `override: true`)
+
+### Accessing Variables
+
+- Use `process.env.VARIABLE_NAME` in the main process
+- Variables are parsed as strings; convert numbers with `parseInt()`
+- Example: `const width = parseInt(process.env.WINDOW_WIDTH) || 900`
+
+### Adding New Variables
+
+1. Add to `.env.sample` with documentation
+2. Update `.env.dev` and `.env.production` with appropriate values
+3. Access via `process.env` in the main process
+
 ## Recommended Development Workflow
 
 1. Run `npm run dev` to start the development server.
@@ -174,4 +203,4 @@ Run `npm run lint` to check for issues; fix automatically with `npm run format` 
 
 ---
 
-_Last updated: 2025‑03‑20_
+_Last updated: 2026‑03‑20_
