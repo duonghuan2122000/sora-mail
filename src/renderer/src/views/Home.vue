@@ -400,13 +400,14 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .sora-home {
+  overflow: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
   padding: var(--space-8);
-  max-width: 800px;
+  // max-width: 800px;
   margin: 0 auto;
 
   &__header-content {

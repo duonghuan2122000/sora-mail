@@ -43,6 +43,7 @@ class DatabaseClient {
   }
 
   async getActiveAccount() {
+    console.log(this.api)
     return this.api.accounts.getActiveAccount()
   }
 

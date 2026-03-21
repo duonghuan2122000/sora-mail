@@ -33,12 +33,13 @@ class AccountModel {
 
   async getActiveAccount() {
     const db = await database.getDb()
-    return db(this.tableName)
+    let account = await db(this.tableName)
       .select('accounts.*', 'providers.display_name as provider_name')
       .leftJoin('providers', 'accounts.provider_id', 'providers.id')
       .where('accounts.sync_enabled', 1)
       .orderBy('accounts.last_sync_at', 'desc')
       .first()
+    return account
   }
 
   async create(accountData) {
