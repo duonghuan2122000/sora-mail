@@ -195,16 +195,7 @@ class Database {
           name: 'gmail',
           display_name: 'Gmail',
           auth_type: 'oauth2',
-          config: JSON.stringify({
-            clientId: '',
-            clientSecret: '',
-            redirectUri: 'http://localhost',
-            scopes: [
-              'https://www.googleapis.com/auth/gmail.readonly',
-              'https://www.googleapis.com/auth/gmail.modify',
-              'https://www.googleapis.com/auth/gmail.labels'
-            ]
-          })
+          config: null,
         })
 
         console.log('Initial provider data seeded')

@@ -86,7 +86,7 @@ class GoogleOAuthService {
       this.authWindow.on('closed', () => {
         this.authWindow = null
         // Notify main window that auth was cancelled
-        if (this.mainWindow) {
+        if (this.mainWindow && this.mainWindow.webContents) {
           this.mainWindow.webContents.send('oauth:cancelled')
         }
       })

@@ -38,6 +38,12 @@ class GoogleOAuthService {
 
   setMainWindow(mainWindow) {
     this.mainWindow = mainWindow
+    console.log('📋 Main window set:', mainWindow ? 'object received' : 'null')
+    if (mainWindow && mainWindow.webContents) {
+      console.log('📋 Main window is BrowserWindow')
+    } else if (mainWindow && mainWindow.send) {
+      console.log('📋 Main window is WebContents')
+    }
   }
 
   async startOAuthFlow() {
@@ -87,9 +93,17 @@ class GoogleOAuthService {
       // Handle window close
       this.authWindow.on('closed', () => {
         this.authWindow = null
+
+        console.log('Main window for cancellation:', this.mainWindow)
         // Notify main window that auth was cancelled
         if (this.mainWindow) {
-          this.mainWindow.webContents.send('oauth:cancelled')
+          if (this.mainWindow.webContents) {
+            // BrowserWindow
+            this.mainWindow.webContents.send('oauth:cancelled')
+          } else if (this.mainWindow.send) {
+            // WebContents
+            this.mainWindow.send('oauth:cancelled')
+          }
         }
       })
 
@@ -112,6 +126,7 @@ class GoogleOAuthService {
         parsedUrl.origin === 'http://localhost' ||
         parsedUrl.href.startsWith('http://localhost/')
       ) {
+        console.log(url)
         const code = parsedUrl.searchParams.get('code')
         const state = parsedUrl.searchParams.get('state')
         const error = parsedUrl.searchParams.get('error')
@@ -130,10 +145,10 @@ class GoogleOAuthService {
         }
 
         // Close auth window
-        if (this.authWindow) {
-          this.authWindow.close()
-          this.authWindow = null
-        }
+        // if (this.authWindow) {
+        //   this.authWindow.close()
+        //   this.authWindow = null
+        // }
 
         // Exchange code for tokens
         const { tokens } = await this.oauth2Client.getToken(code)
@@ -170,10 +185,17 @@ class GoogleOAuthService {
 
         // Notify main window of success
         if (this.mainWindow) {
-          this.mainWindow.webContents.send('oauth:success', {
+          const data = {
             account,
             userInfo
-          })
+          }
+          if (this.mainWindow.webContents) {
+            // BrowserWindow
+            this.mainWindow.webContents.send('oauth:success', data)
+          } else if (this.mainWindow.send) {
+            // WebContents
+            this.mainWindow.send('oauth:success', data)
+          }
         }
 
         return {
@@ -193,10 +215,17 @@ class GoogleOAuthService {
 
       // Notify main window of error
       if (this.mainWindow) {
-        this.mainWindow.webContents.send('oauth:error', {
+        const data = {
           error: error.message,
           details: error.toString()
-        })
+        }
+        if (this.mainWindow.webContents) {
+          // BrowserWindow
+          this.mainWindow.webContents.send('oauth:error', data)
+        } else if (this.mainWindow.send) {
+          // WebContents
+          this.mainWindow.send('oauth:error', data)
+        }
       }
 
       throw error

@@ -38,7 +38,14 @@ class OAuthIpcHandlers {
       this.ipcMain.handle('oauth:startGmail', async (event) => {
         try {
           // Set main window for OAuth service
-          this.oauthService.setMainWindow(event.sender)
+          // event.sender is WebContents, we need to get the BrowserWindow from it
+          const browserWindow = this.electron.BrowserWindow.fromWebContents(event.sender)
+          if (browserWindow) {
+            this.oauthService.setMainWindow(browserWindow)
+          } else {
+            console.warn('⚠️ Could not get BrowserWindow from WebContents')
+            this.oauthService.setMainWindow(event.sender)
+          }
 
           // Start OAuth flow
           await this.oauthService.startOAuthFlow()
@@ -63,10 +70,15 @@ class OAuthIpcHandlers {
 
           // Notify renderer of success
           if (this.mainWindow) {
-            this.mainWindow.webContents.send('oauth:callbackSuccess', {
+            const data = {
               account: result.account,
               userInfo: result.userInfo
-            })
+            }
+            if (this.mainWindow.webContents) {
+              this.mainWindow.webContents.send('oauth:callbackSuccess', data)
+            } else if (this.mainWindow.send) {
+              this.mainWindow.send('oauth:callbackSuccess', data)
+            }
           }
 
           return {
@@ -79,10 +91,15 @@ class OAuthIpcHandlers {
 
           // Notify renderer of error
           if (this.mainWindow) {
-            this.mainWindow.webContents.send('oauth:callbackError', {
+            const data = {
               error: error.message,
               details: error.toString()
-            })
+            }
+            if (this.mainWindow.webContents) {
+              this.mainWindow.webContents.send('oauth:callbackError', data)
+            } else if (this.mainWindow.send) {
+              this.mainWindow.send('oauth:callbackError', data)
+            }
           }
 
           return {
@@ -330,7 +347,12 @@ class OAuthIpcHandlers {
 
           // Start sync process
           if (this.mainWindow) {
-            this.mainWindow.webContents.send('sync:started', { accountId })
+            const data = { accountId }
+            if (this.mainWindow.webContents) {
+              this.mainWindow.webContents.send('sync:started', data)
+            } else if (this.mainWindow.send) {
+              this.mainWindow.send('sync:started', data)
+            }
           }
 
           // Use GmailSyncService for comprehensive sync
@@ -340,12 +362,17 @@ class OAuthIpcHandlers {
           await AccountModel.updateSyncStatus(accountId, new Date())
 
           if (this.mainWindow) {
-            this.mainWindow.webContents.send('sync:completed', {
+            const data = {
               accountId,
               profile: syncResult.profile,
               labelsCount: syncResult.labelsCount,
               messagesCount: syncResult.messagesCount
-            })
+            }
+            if (this.mainWindow.webContents) {
+              this.mainWindow.webContents.send('sync:completed', data)
+            } else if (this.mainWindow.send) {
+              this.mainWindow.send('sync:completed', data)
+            }
           }
 
           return {
@@ -356,10 +383,15 @@ class OAuthIpcHandlers {
           console.error('Error syncing account:', error)
 
           if (this.mainWindow) {
-            this.mainWindow.webContents.send('sync:error', {
+            const data = {
               accountId,
               error: error.message
-            })
+            }
+            if (this.mainWindow.webContents) {
+              this.mainWindow.webContents.send('sync:error', data)
+            } else if (this.mainWindow.send) {
+              this.mainWindow.send('sync:error', data)
+            }
           }
 
           return {
