@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { Message, Globe } from '@element-plus/icons-vue'
+import { Message } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
 
 const { t, locale } = useI18n()
@@ -33,7 +33,6 @@ const changeLanguage = (lang) => {
           v-model="selectedLanguage"
           class="sora-home__language-select"
           size="small"
-          :prefix-icon="Globe"
           @change="changeLanguage"
         >
           <el-option
