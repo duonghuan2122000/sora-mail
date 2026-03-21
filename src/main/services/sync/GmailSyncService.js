@@ -44,17 +44,23 @@ export default class GmailSyncService {
         this.oauthService = createGoogleOAuthService(this.electron)
       }
 
-      // Get Gmail client
-      const gmail = await this.oauthService.getGmailClient(accountId)
+      // Get Gmail client (OAuth2Client instance)
+      const gmailClient = await this.oauthService.getGmailClient(accountId)
+      if (!gmailClient) {
+        throw new Error('Failed to initialize Gmail client')
+      }
 
-      // Step 1: Get user profile
+      // Step 1: Get user profile using request method
       this.updateProgress(20, 'profile', 'Getting user profile...')
-      const profile = await gmail.users.getProfile({ userId: 'me' })
-      console.log('User profile:', profile.data)
+      const profileResponse = await gmailClient.request({
+        url: 'https://www.googleapis.com/gmail/v1/users/me/profile'
+      })
+      const profile = profileResponse.data
+      console.log('User profile:', profile)
 
       // Step 2: Sync labels
       this.updateProgress(30, 'labels', 'Syncing labels...')
-      const labels = await this.syncLabels(accountId, gmail)
+      const labels = await this.syncLabels(accountId, gmailClient)
 
       // Step 3: Sync folders (Gmail labels as folders)
       this.updateProgress(40, 'folders', 'Syncing folders...')
@@ -62,7 +68,7 @@ export default class GmailSyncService {
 
       // Step 4: Sync messages
       this.updateProgress(50, 'messages', 'Syncing messages...')
-      const messages = await this.syncMessages(accountId, gmail, folders)
+      const messages = await this.syncMessages(accountId, gmailClient, folders, labels)
 
       // Step 5: Update account sync status
       this.updateProgress(90, 'updating', 'Updating sync status...')
@@ -72,21 +78,25 @@ export default class GmailSyncService {
 
       return {
         success: true,
-        profile: profile.data,
+        profile: profile,
         labelsCount: labels.length,
         foldersCount: folders.length,
         messagesCount: messages.length,
         message: `Synced ${messages.length} messages from ${folders.length} folders`
       }
-    } catch {
-      console.error('Error extracting body')
-      return 'No preview available'
+    } catch (error) {
+      console.error('Error syncing account:', error)
+      throw error
+    } finally {
+      this.isSyncing = false
     }
   }
 
-  async syncLabels(accountId, gmail) {
+  async syncLabels(accountId, gmailClient) {
     try {
-      const response = await gmail.users.labels.list({ userId: 'me' })
+      const response = await gmailClient.request({
+        url: 'https://www.googleapis.com/gmail/v1/users/me/labels'
+      })
       const gmailLabels = response.data.labels || []
 
       const labels = []
@@ -181,7 +191,7 @@ export default class GmailSyncService {
     }
   }
 
-  async syncMessages(accountId, gmail, folders) {
+  async syncMessages(accountId, gmailClient, folders, labels) {
     try {
       // Get inbox folder
       const inboxFolder = folders.find((f) => f.name === 'INBOX')
@@ -190,10 +200,12 @@ export default class GmailSyncService {
       }
 
       // Get recent messages
-      const response = await gmail.users.messages.list({
-        userId: 'me',
-        maxResults: 50,
-        labelIds: ['INBOX']
+      const response = await gmailClient.request({
+        url: 'https://www.googleapis.com/gmail/v1/users/me/messages',
+        params: {
+          maxResults: 1,
+          labelIds: ['INBOX']
+        }
       })
 
       const messageIds = response.data.messages || []
@@ -211,13 +223,16 @@ export default class GmailSyncService {
           )
 
           // Get full message
-          const messageResponse = await gmail.users.messages.get({
-            userId: 'me',
-            id: messageId,
-            format: 'full'
+          const messageResponse = await gmailClient.request({
+            url: `https://www.googleapis.com/gmail/v1/users/me/messages/${messageId}`,
+            params: {
+              format: 'full'
+            }
           })
 
           const gmailMessage = messageResponse.data
+
+          console.log(gmailMessage)
 
           // Parse message headers
           const headers = this.parseHeaders(gmailMessage.payload.headers)
@@ -242,7 +257,7 @@ export default class GmailSyncService {
           }
 
           // Check if message already exists
-          let mail = await MailModel.getByMessageId(gmailMessage.id)
+          let mail = await MailModel.getByMessageId(accountId, gmailMessage.id)
 
           if (!mail) {
             mail = await MailModel.create(mailData)
@@ -254,9 +269,15 @@ export default class GmailSyncService {
           messages.push(mail)
 
           // Process labels for this message
-          await this.processMessageLabels(accountId, mail.id, gmailMessage.labelIds || [], folders)
-        } catch {
-          console.error(`Error syncing message ${messageIds[i]?.id}`)
+          await this.processMessageLabels(
+            accountId,
+            mail.id,
+            gmailMessage.labelIds || [],
+            folders,
+            labels
+          )
+        } catch (err) {
+          console.error(`Error syncing message ${messageIds[i]?.id}`, err)
         }
       }
 
@@ -270,14 +291,14 @@ export default class GmailSyncService {
     }
   }
 
-  async processMessageLabels(accountId, mailId, labelIds, folders) {
+  async processMessageLabels(accountId, mailId, labelIds, folders, labels) {
     try {
       for (const labelId of labelIds) {
         // Find corresponding folder
-        const folder = folders.find((f) => f.name === labelId)
-        if (folder && folder.id) {
+        const label = labels.find((f) => f.name === labelId)
+        if (label && label.id) {
           // Add label to mail (this creates a mail_label record)
-          await LabelModel.addLabelToMail(mailId, folder.id)
+          await LabelModel.addLabelToMail(mailId, label.id)
         }
       }
     } catch (err) {

@@ -156,7 +156,7 @@ app.on('window-all-closed', () => {
 // code. You can also put them in separate files and require them here.
 
 // Fallback function to register OAuth handlers directly
-function registerOAuthHandlersDirectly(ipcMain, electron) {
+function registerOAuthHandlersDirectly(ipcMain) {
   console.log('🔧 Registering OAuth handlers directly...')
 
   // Simple handler for testing

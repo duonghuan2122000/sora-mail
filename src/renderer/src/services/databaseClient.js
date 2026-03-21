@@ -228,7 +228,7 @@ class DatabaseClient {
     return {
       ...mail,
       // Parse recipients if stored as JSON
-      recipients: mail.recipients ? JSON.parse(mail.recipients) : [],
+      // recipients: mail.recipients ? JSON.parse(mail.recipients) : [],
       // Ensure boolean values
       is_unread: Boolean(mail.is_unread),
       is_starred: Boolean(mail.is_starred),

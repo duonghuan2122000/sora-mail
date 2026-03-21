@@ -15,10 +15,10 @@ const mockElectron = {
 
 // Mock ipcMain
 const mockIpcMain = {
-  handle: (channel, handler) => {
+  handle: (channel) => {
     console.log(`Handler registered for channel: ${channel}`)
   },
-  on: (channel, handler) => {
+  on: (channel) => {
     console.log(`Listener registered for channel: ${channel}`)
   }
 }

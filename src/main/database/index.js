@@ -195,7 +195,7 @@ class Database {
           name: 'gmail',
           display_name: 'Gmail',
           auth_type: 'oauth2',
-          config: null,
+          config: null
         })
 
         console.log('Initial provider data seeded')

@@ -42,7 +42,7 @@ class MailModel {
 
   async getByMessageId(accountId, messageId) {
     const db = await database.getDb()
-    return db(this.tableName).where({ account_id: accountId, message_id: messageId }).first()
+    return await db(this.tableName).where({ account_id: accountId, message_id: messageId }).first()
   }
 
   async getByThreadId(accountId, threadId) {

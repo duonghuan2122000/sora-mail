@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import {
   Menu as IconMenu,
   Message,
@@ -33,6 +34,7 @@ const labelList = ref([])
 const selectedFolder = ref('Inbox')
 const searchQuery = ref('')
 const isLoading = ref(true)
+const isRefreshing = ref(false)
 const activeAccount = ref(null)
 const currentFolder = ref(null)
 
@@ -60,7 +62,10 @@ const handleDeleteMail = async (mail) => {
     const index = mailList.value.findIndex((m) => m.id === mail.id)
     if (index !== -1) {
       mailList.value.splice(index, 1)
+      ElMessage.success('Email deleted')
     }
+  } else {
+    ElMessage.error('Failed to delete email')
   }
 }
 
@@ -118,6 +123,57 @@ const loadData = async () => {
   }
 }
 
+const refreshMailList = async () => {
+  if (!currentFolder.value || !currentFolder.value.id) {
+    return
+  }
+
+  try {
+    const mails = await getMails(currentFolder.value.id, { limit: 50 })
+    mailList.value = mails
+
+    // Update folder counts if needed
+    if (activeAccount.value) {
+      const accountData = await initializeAccountData(activeAccount.value.id)
+      folderList.value = accountData.folders
+      labelList.value = accountData.labels
+    }
+  } catch (error) {
+    console.error('Error refreshing mail list:', error)
+  }
+}
+
+const handleRefresh = async () => {
+  if (!activeAccount.value) {
+    ElMessage.warning('No active account selected')
+    return
+  }
+
+  if (isRefreshing.value) {
+    return
+  }
+
+  isRefreshing.value = true
+
+  try {
+    // Sync account using OAuth sync API
+    const result = await window.database.oauth.syncAccount(activeAccount.value.id)
+
+    if (result.success) {
+      ElMessage.success(`Sync completed: ${result.messagesCount} messages synced`)
+      // Refresh mail list after sync
+      await refreshMailList()
+    } else {
+      ElMessage.error(`Sync failed: ${result.error}`)
+    }
+  } catch (error) {
+    console.error('Refresh error:', error)
+    ElMessage.error('Failed to sync emails')
+  } finally {
+    isRefreshing.value = false
+  }
+}
+
 const handleFolderClick = async (folderName) => {
   selectedFolder.value = folderName
   const folder = folderList.value.find((f) => f.displayName === folderName)
@@ -132,6 +188,17 @@ const handleFolderClick = async (folderName) => {
 onMounted(() => {
   console.log('MailList mounted')
   loadData()
+
+  // Add event listeners for sync events
+  if (window.database && window.database.oauth) {
+    window.database.oauth.onSyncCompleted((data) => {
+      console.log('Sync completed:', data)
+      // Refresh mail list when sync completes for the current account
+      if (data.accountId === activeAccount.value?.id) {
+        refreshMailList()
+      }
+    })
+  }
 })
 </script>
 
@@ -156,7 +223,7 @@ onMounted(() => {
         />
       </div>
       <div class="sora-mail__header-right">
-        <el-button :icon="Refresh" text />
+        <el-button :icon="Refresh" text :loading="isRefreshing" @click="handleRefresh" />
         <el-button :icon="More" text />
         <el-avatar :icon="User" size="small" />
       </div>
@@ -209,7 +276,7 @@ onMounted(() => {
                 <span>Select</span>
               </el-button>
             </el-dropdown>
-            <el-button :icon="Refresh" text />
+            <el-button :icon="Refresh" text :loading="isRefreshing" @click="handleRefresh" />
             <el-button :icon="More" text />
           </div>
           <div class="sora-mail__toolbar-right">
