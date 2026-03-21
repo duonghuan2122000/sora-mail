@@ -24,7 +24,8 @@
     "dotenv": "^17.3.1",
     "electron-updater": "^6.3.9",
     "element-plus": "^2.13.6",
-    "vue-i18n": "^11.3.0"
+    "vue-i18n": "^11.3.0",
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^2.1.0",

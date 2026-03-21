@@ -5,6 +5,7 @@ import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import App from './App.vue'
+import router from './router'
 
 // i18n configuration
 const messages = {
@@ -53,4 +54,5 @@ const i18n = createI18n({
 const app = createApp(App)
 app.use(i18n)
 app.use(ElementPlus)
+app.use(router)
 app.mount('#app')
