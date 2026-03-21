@@ -12,15 +12,29 @@ import {
   User,
   Setting
 } from '@element-plus/icons-vue'
-import { mails as mailData, folders, labels } from '@renderer/services/mailService'
+import {
+  mails as mockMailData,
+  folders as mockFolders,
+  labels as mockLabels,
+  getMails,
+  toggleStar,
+  deleteMail,
+  initializeDatabase,
+  getActiveAccount,
+  initializeAccountData,
+  migrateMockData
+} from '@renderer/services/mailServiceV2'
 
 const router = useRouter()
 
-const mailList = ref(mailData)
-const folderList = ref(folders)
-const labelList = ref(labels)
+const mailList = ref([])
+const folderList = ref([])
+const labelList = ref([])
 const selectedFolder = ref('Inbox')
 const searchQuery = ref('')
+const isLoading = ref(true)
+const activeAccount = ref(null)
+const currentFolder = ref(null)
 
 const goBack = () => {
   router.push('/')
@@ -30,19 +44,94 @@ const openMail = (mail) => {
   router.push(`/mail/${mail.id}`)
 }
 
-const toggleStar = (mail) => {
-  mail.starred = !mail.starred
+const handleToggleStar = async (mail) => {
+  const updatedMail = await toggleStar(mail)
+  if (updatedMail) {
+    const index = mailList.value.findIndex((m) => m.id === mail.id)
+    if (index !== -1) {
+      mailList.value[index] = updatedMail
+    }
+  }
 }
 
-const deleteMail = (mail) => {
-  const index = mailList.value.findIndex((m) => m.id === mail.id)
-  if (index !== -1) {
-    mailList.value.splice(index, 1)
+const handleDeleteMail = async (mail) => {
+  const success = await deleteMail(mail)
+  if (success) {
+    const index = mailList.value.findIndex((m) => m.id === mail.id)
+    if (index !== -1) {
+      mailList.value.splice(index, 1)
+    }
+  }
+}
+
+const loadData = async () => {
+  try {
+    isLoading.value = true
+
+    // Initialize database
+    await initializeDatabase()
+
+    // Get active account
+    activeAccount.value = await getActiveAccount()
+
+    if (activeAccount.value) {
+      // Initialize account data (folders, labels)
+      const accountData = await initializeAccountData(activeAccount.value.id)
+      folderList.value = accountData.folders
+      labelList.value = accountData.labels
+
+      // Get default inbox folder
+      const inboxFolder = folderList.value.find((f) => f.name === 'INBOX')
+      if (inboxFolder) {
+        currentFolder.value = inboxFolder
+        selectedFolder.value = inboxFolder.displayName
+
+        // Load mails for inbox
+        const mails = await getMails(inboxFolder.id, { limit: 50 })
+        mailList.value = mails
+
+        // If no mails in database, migrate mock data
+        if (mails.length === 0) {
+          const migrationResult = await migrateMockData(activeAccount.value.id, inboxFolder.id)
+          if (migrationResult.success) {
+            // Reload mails after migration
+            const migratedMails = await getMails(inboxFolder.id, { limit: 50 })
+            mailList.value = migratedMails
+          }
+        }
+      }
+    } else {
+      // No active account, use mock data
+      console.log('No active account found, using mock data')
+      folderList.value = mockFolders
+      labelList.value = mockLabels
+      mailList.value = mockMailData
+    }
+  } catch (error) {
+    console.error('Error loading data:', error)
+    // Fallback to mock data
+    folderList.value = mockFolders
+    labelList.value = mockLabels
+    mailList.value = mockMailData
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const handleFolderClick = async (folderName) => {
+  selectedFolder.value = folderName
+  const folder = folderList.value.find((f) => f.displayName === folderName)
+
+  if (folder && folder.id) {
+    currentFolder.value = folder
+    const mails = await getMails(folder.id, { limit: 50 })
+    mailList.value = mails
   }
 }
 
 onMounted(() => {
   console.log('MailList mounted')
+  loadData()
 })
 </script>
 
@@ -83,13 +172,13 @@ onMounted(() => {
         <div class="sora-mail__folders">
           <div
             v-for="folder in folderList"
-            :key="folder.name"
+            :key="folder.id || folder.name"
             class="sora-mail__folder"
-            :class="{ 'sora-mail__folder--active': selectedFolder === folder.name }"
-            @click="selectedFolder = folder.name"
+            :class="{ 'sora-mail__folder--active': selectedFolder === folder.displayName }"
+            @click="handleFolderClick(folder.displayName)"
           >
             <component :is="folder.icon" class="sora-mail__folder-icon" />
-            <span class="sora-mail__folder-name">{{ folder.name }}</span>
+            <span class="sora-mail__folder-name">{{ folder.displayName }}</span>
             <span v-if="folder.count > 0" class="sora-mail__folder-count">
               {{ folder.count }}
             </span>
@@ -143,7 +232,7 @@ onMounted(() => {
             <div class="sora-mail__mail-checkbox">
               <el-checkbox />
             </div>
-            <div class="sora-mail__mail-star" @click.stop="toggleStar(mail)">
+            <div class="sora-mail__mail-star" @click.stop="handleToggleStar(mail)">
               <el-icon :color="mail.starred ? '#FBBC05' : '#ccc'">
                 <Star />
               </el-icon>
@@ -162,15 +251,20 @@ onMounted(() => {
             <div class="sora-mail__mail-time">
               <div class="sora-mail__mail-time-text">{{ mail.time }}</div>
               <div class="sora-mail__mail-actions">
-                <el-button :icon="Delete" text @click.stop="deleteMail(mail)" />
+                <el-button :icon="Delete" text @click.stop="handleDeleteMail(mail)" />
                 <el-button :icon="More" text />
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Empty state (optional) -->
-        <div v-if="mailList.length === 0" class="sora-mail__empty">
+        <!-- Loading state -->
+        <div v-if="isLoading" class="sora-mail__empty">
+          <el-empty description="Loading emails..." />
+        </div>
+
+        <!-- Empty state -->
+        <div v-else-if="mailList.length === 0" class="sora-mail__empty">
           <el-empty description="No emails in this folder" />
         </div>
       </main>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   Menu as IconMenu,
@@ -16,38 +16,84 @@ import {
   Document,
   Folder
 } from '@element-plus/icons-vue'
-import { getMailById, mails, folders, labels } from '@renderer/services/mailService'
+import {
+  getFullMail,
+  toggleStar,
+  deleteMail,
+  initializeDatabase,
+  getActiveAccount,
+  initializeAccountData
+} from '@renderer/services/mailServiceV2'
 
 const route = useRoute()
 const router = useRouter()
 
-const mailId = parseInt(route.params.id)
-const mail = computed(() => getMailById(mailId))
-
-const folderList = ref(folders)
-const labelList = ref(labels)
+const mailId = route.params.id
+const mail = ref(null)
+const folderList = ref([])
+const labelList = ref([])
 const selectedFolder = ref('Inbox')
 const searchQuery = ref('')
+const isLoading = ref(true)
+const activeAccount = ref(null)
 
 const goBack = () => {
   router.push('/mail')
 }
 
-const toggleStar = () => {
+const handleToggleStar = async () => {
   if (mail.value) {
-    mail.value.starred = !mail.value.starred
+    const updatedMail = await toggleStar(mail.value)
+    if (updatedMail) {
+      mail.value = updatedMail
+    }
   }
 }
 
-const deleteMail = () => {
+const handleDeleteMail = async () => {
   if (mail.value) {
-    const index = mails.findIndex((m) => m.id === mail.value.id)
-    if (index !== -1) {
-      mails.splice(index, 1)
+    const success = await deleteMail(mail.value)
+    if (success) {
       router.push('/mail')
     }
   }
 }
+
+const loadData = async () => {
+  try {
+    isLoading.value = true
+
+    // Initialize database
+    await initializeDatabase()
+
+    // Get active account
+    activeAccount.value = await getActiveAccount()
+
+    if (activeAccount.value) {
+      // Initialize account data (folders, labels)
+      const accountData = await initializeAccountData(activeAccount.value.id)
+      folderList.value = accountData.folders
+      labelList.value = accountData.labels
+    }
+
+    // Load mail details
+    const mailData = await getFullMail(mailId)
+    mail.value = mailData
+
+    if (!mail.value) {
+      console.error('Mail not found:', mailId)
+      // Could redirect to 404 page here
+    }
+  } catch (error) {
+    console.error('Error loading mail detail:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <template>
@@ -125,18 +171,23 @@ const deleteMail = () => {
           <div class="sora-mail__toolbar-right">
             <el-button :icon="Document" text />
             <el-button :icon="Folder" text />
-            <el-button :icon="Delete" text @click="deleteMail" />
+            <el-button :icon="Delete" text @click="handleDeleteMail" />
             <el-button :icon="More" text />
           </div>
         </div>
 
+        <!-- Loading state -->
+        <div v-if="isLoading" class="sora-mail__empty">
+          <el-empty description="Loading email..." />
+        </div>
+
         <!-- Mail Detail -->
-        <div v-if="mail" class="sora-mail__mail-detail">
+        <div v-else-if="mail" class="sora-mail__mail-detail">
           <div class="sora-mail__mail-header">
             <div class="sora-mail__mail-subject-row">
               <h1 class="sora-mail__mail-subject">{{ mail.subject }}</h1>
               <div class="sora-mail__mail-actions">
-                <el-button :icon="Star" text @click="toggleStar">
+                <el-button :icon="Star" text @click="handleToggleStar">
                   {{ mail.starred ? 'Unstar' : 'Star' }}
                 </el-button>
                 <el-button :icon="Refresh" text>Reply</el-button>
@@ -194,6 +245,7 @@ const deleteMail = () => {
           </div>
         </div>
 
+        <!-- Not found state -->
         <div v-else class="sora-mail__empty">
           <el-empty description="Email not found" />
         </div>

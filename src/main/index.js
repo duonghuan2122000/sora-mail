@@ -2,6 +2,8 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import database from './database/index.js'
+import './services/databaseService.js'
 
 // Load environment variables
 import dotenv from 'dotenv'
@@ -92,6 +94,11 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  // Initialize database
+  database.initialize().catch((error) => {
+    console.error('Failed to initialize database:', error)
+  })
 
   createWindow()
 
