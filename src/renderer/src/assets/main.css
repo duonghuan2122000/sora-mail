@@ -30,11 +30,11 @@ code {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin-bottom: 80px;
+  margin-bottom: var(--space-20);
 }
 
 .logo {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
   -webkit-user-drag: none;
   height: 128px;
   width: 128px;
@@ -47,28 +47,28 @@ code {
 }
 
 .creator {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   line-height: 16px;
   color: var(--ev-c-text-2);
-  font-weight: 600;
-  margin-bottom: 10px;
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-2);
 }
 
 .text {
   font-size: 28px;
   color: var(--ev-c-text-1);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   line-height: 32px;
   text-align: center;
-  margin: 0 10px;
-  padding: 16px 0;
+  margin: 0 var(--space-3);
+  padding: var(--space-4) 0;
 }
 
 .tip {
-  font-size: 16px;
+  font-size: var(--font-size-base);
   line-height: 24px;
   color: var(--ev-c-text-2);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .vue {
@@ -98,12 +98,12 @@ code {
   display: inline-block;
   border: 1px solid transparent;
   text-align: center;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   white-space: nowrap;
-  border-radius: 20px;
-  padding: 0 20px;
+  border-radius: var(--radius-xl);
+  padding: 0 var(--space-5);
   line-height: 38px;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   border-color: var(--ev-button-alt-border);
   color: var(--ev-button-alt-text);
   background-color: var(--ev-button-alt-bg);
@@ -117,15 +117,15 @@ code {
 
 .versions {
   position: absolute;
-  bottom: 30px;
+  bottom: var(--space-8);
   margin: 0 auto;
-  padding: 15px 0;
-  font-family: 'Menlo', 'Lucida Console', monospace;
+  padding: var(--space-4) 0;
+  font-family: var(--font-family-mono);
   display: inline-flex;
   overflow: hidden;
   align-items: center;
-  border-radius: 22px;
-  background-color: #202127;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-gray-950);
   backdrop-filter: blur(24px);
 }
 
@@ -133,8 +133,8 @@ code {
   display: block;
   float: left;
   border-right: 1px solid var(--ev-c-gray-1);
-  padding: 0 20px;
-  font-size: 14px;
+  padding: 0 var(--space-5);
+  font-size: var(--font-size-sm);
   line-height: 14px;
   opacity: 0.8;
   &:last-child {
@@ -144,7 +144,7 @@ code {
 
 @media (max-width: 720px) {
   .text {
-    font-size: 20px;
+    font-size: var(--font-size-xl);
   }
 }
 

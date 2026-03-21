@@ -1,0 +1,174 @@
+// Base spacing unit
+$space-unit: 4px;
+
+// Spacing scale (based on 4px unit)
+$space-1: $space-unit; // 4px
+$space-2: $space-unit * 2; // 8px
+$space-3: $space-unit * 3; // 12px
+$space-4: $space-unit * 4; // 16px
+$space-5: $space-unit * 5; // 20px
+$space-6: $space-unit * 6; // 24px
+$space-8: $space-unit * 8; // 32px
+$space-10: $space-unit * 10; // 40px
+$space-12: $space-unit * 12; // 48px
+$space-16: $space-unit * 16; // 64px
+
+// Border radius
+$radius-sm: $space-unit; // 4px
+$radius-md: $space-unit * 2; // 8px
+$radius-lg: $space-unit * 4; // 16px
+$radius-xl: $space-unit * 6; // 24px
+$radius-full: 9999px; // Full rounded
+
+// Color palette
+$color-white: #ffffff;
+$color-white-soft: #f8f8f8;
+$color-white-mute: #f2f2f2;
+
+$color-black: #000000;
+$color-black-soft: #222222;
+$color-black-mute: #282828;
+
+$color-gray-50: #fafafa;
+$color-gray-100: #f5f5f5;
+$color-gray-200: #eeeeee;
+$color-gray-300: #e0e0e0;
+$color-gray-400: #bdbdbd;
+$color-gray-500: #9e9e9e;
+$color-gray-600: #757575;
+$color-gray-700: #616161;
+$color-gray-800: #424242;
+$color-gray-900: #212121;
+
+$color-blue-50: #e3f2fd;
+$color-blue-100: #bbdefb;
+$color-blue-200: #90caf9;
+$color-blue-300: #64b5f6;
+$color-blue-400: #42a5f5;
+$color-blue-500: #2196f3;
+$color-blue-600: #1e88e5;
+$color-blue-700: #1976d2;
+$color-blue-800: #1565c0;
+$color-blue-900: #0d47a1;
+
+$color-red-50: #ffebee;
+$color-red-100: #ffcdd2;
+$color-red-200: #ef9a9a;
+$color-red-300: #e57373;
+$color-red-400: #ef5350;
+$color-red-500: #f44336;
+$color-red-600: #e53935;
+$color-red-700: #d32f2f;
+$color-red-800: #c62828;
+$color-red-900: #b71c1c;
+
+$color-green-50: #e8f5e9;
+$color-green-100: #c8e6c9;
+$color-green-200: #a5d6a7;
+$color-green-300: #81c784;
+$color-green-400: #66bb6a;
+$color-green-500: #4caf50;
+$color-green-600: #43a047;
+$color-green-700: #388e3c;
+$color-green-800: #2e7d32;
+$color-green-900: #1b5e20;
+
+$color-yellow-50: #fffde7;
+$color-yellow-100: #fff9c4;
+$color-yellow-200: #fff59d;
+$color-yellow-300: #fff176;
+$color-yellow-400: #ffee58;
+$color-yellow-500: #ffeb3b;
+$color-yellow-600: #fdd835;
+$color-yellow-700: #fbc02d;
+$color-yellow-800: #f9a825;
+$color-yellow-900: #f57f17;
+
+// Semantic colors
+$color-background: $color-white;
+$color-background-soft: $color-white-soft;
+$color-background-mute: $color-white-mute;
+
+$color-text: $color-black;
+$color-text-soft: $color-gray-800;
+$color-text-mute: $color-gray-600;
+$color-text-light: $color-gray-500;
+
+// Element UI colors
+$color-primary: $color-blue-600;
+$color-primary-light: $color-blue-500;
+$color-primary-dark: $color-blue-700;
+
+$color-success: $color-green-600;
+$color-warning: $color-yellow-700;
+$color-danger: $color-red-600;
+$color-info: $color-gray-600;
+
+// Border colors
+$color-border: $color-gray-300;
+$color-border-light: $color-gray-200;
+$color-border-dark: $color-gray-400;
+
+// Shadow
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+// Z-index scale
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+
+// Typography
+$font-family-base:
+  'Inter',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  Oxygen,
+  Ubuntu,
+  Cantarell,
+  'Fira Sans',
+  'Droid Sans',
+  'Helvetica Neue',
+  sans-serif;
+$font-family-mono:
+  ui-monospace,
+  SFMono-Regular,
+  SF Mono,
+  Menlo,
+  Consolas,
+  'Liberation Mono',
+  monospace;
+
+$font-size-xs: 0.75rem; // 12px
+$font-size-sm: 0.875rem; // 14px
+$font-size-base: 1rem; // 16px
+$font-size-lg: 1.125rem; // 18px
+$font-size-xl: 1.25rem; // 20px
+$font-size-2xl: 1.5rem; // 24px
+$font-size-3xl: 1.875rem; // 30px
+$font-size-4xl: 2.25rem; // 36px
+$font-size-5xl: 3rem; // 48px
+
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+$line-height-tight: 1.25;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// Breakpoints
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;

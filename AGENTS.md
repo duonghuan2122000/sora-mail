@@ -107,7 +107,7 @@ src/
 - **BEM methodology**: Follow Block-Element-Modifier naming convention
 - **Prefix**: Use `sora-` prefix for all CSS class names
 - **Nesting**: Use SCSS nesting for better readability (max 3 levels deep)
-- **Variables**: Define colors, spacing, breakpoints in SCSS variables (when centralized)
+- **Variables**: Use centralized design tokens from `src/renderer/src/assets/scss/_variables.scss` and CSS custom properties in `base.css` (see Style System & Variables section below)
 - **Example structure**:
 
   ```scss
@@ -124,8 +124,117 @@ src/
   }
   ```
 
-- **Responsive design**: Use mobile-first approach with SCSS mixins/media queries
-- **Current example**: See `src/renderer/src/App.vue` for reference implementation
+  - **Responsive design**: Use mobile-first approach with SCSS mixins/media queries
+  - **Current example**: See `src/renderer/src/App.vue` for reference implementation
+
+## Style System & Variables
+
+The project uses a centralized style system with CSS Custom Properties and SCSS variables for consistency.
+
+### Design Tokens & Variables
+
+#### Base Spacing Unit
+
+- **Base unit**: 4px (`--space-unit` / `$space-unit`)
+- **Spacing scale**: Multiples of 4px (4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80px)
+- **Variables**: `--space-1` to `--space-20` (CSS), `$space-1` to `$space-16` (SCSS)
+
+#### Border Radius
+
+- `--radius-sm`: 4px
+- `--radius-md`: 8px
+- `--radius-lg`: 16px
+- `--radius-xl`: 24px
+- `--radius-full`: 9999px
+
+#### Color System
+
+**Core colors** (CSS variables):
+
+- `--color-white`, `--color-white-soft`, `--color-white-mute`
+- `--color-black`, `--color-black-soft`, `--color-black-mute`
+- Gray scale: `--color-gray-50` to `--color-gray-950`
+- Semantic colors: `--color-primary`, `--color-success`, `--color-warning`, `--color-danger`, `--color-info`
+
+**Semantic color usage**:
+
+- Background: `--color-background`, `--color-background-soft`, `--color-background-mute`
+- Text: `--color-text`, `--color-text-soft`, `--color-text-mute`, `--color-text-light`
+- Border: `--color-border`, `--color-border-light`, `--color-border-dark`
+
+#### Typography
+
+- **Font families**: `--font-family-base` (Inter/system stack), `--font-family-mono` (monospace)
+- **Font sizes**: `--font-size-xs` (12px) to `--font-size-5xl` (48px)
+- **Font weights**: `--font-weight-normal` (400) to `--font-weight-bold` (700)
+- **Line heights**: `--line-height-tight` (1.25) to `--line-height-relaxed` (1.75)
+
+#### Shadows
+
+- `--shadow-sm`: 0 1px 2px rgba(0, 0, 0, 0.05)
+- `--shadow-md`: 0 4px 6px rgba(0, 0, 0, 0.1)
+- `--shadow-lg`: 0 10px 15px rgba(0, 0, 0, 0.1)
+- `--shadow-xl`: 0 20px 25px rgba(0, 0, 0, 0.15)
+
+### File Structure
+
+- **CSS Custom Properties**: Defined in `src/renderer/src/assets/base.css` (`:root` selector)
+- **SCSS Variables**: Available in `src/renderer/src/assets/scss/_variables.scss`
+- **Usage in components**: Import SCSS variables OR use CSS variables directly
+
+### Usage Examples
+
+**In Vue components (CSS variables)**:
+
+```css
+.component {
+  padding: var(--space-4);
+  color: var(--color-text);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+}
+```
+
+**In SCSS files (SCSS variables)**:
+
+```scss
+@import '@/assets/scss/variables';
+
+.component {
+  padding: $space-4;
+  color: $color-text;
+  background-color: $color-background;
+}
+```
+
+**Responsive design**:
+
+```scss
+@media (max-width: 768px) {
+  .component {
+    padding: var(--space-2);
+    font-size: var(--font-size-sm);
+  }
+}
+```
+
+### Legacy Compatibility
+
+The project maintains backward compatibility with existing Electron/Vite variables:
+
+- `--ev-c-white`, `--ev-c-black`, `--ev-c-text-1`, etc.
+- Use new semantic variables (`--color-*`) for new code
+- Update existing code gradually to use new variables
+
+### Guidelines for AI Agents
+
+1. **Always use design tokens**: Never hardcode colors, spacing, or typography values
+2. **Prefer CSS variables**: Use `var(--color-*)` over SCSS variables in Vue components
+3. **Follow spacing scale**: Use `--space-*` variables for all margins, paddings, gaps
+4. **Maintain consistency**: Use same variable for same semantic meaning across components
+5. **Test contrast**: Ensure text colors have sufficient contrast against backgrounds
 
 ## ESLint Configuration
 
@@ -231,4 +340,4 @@ The project uses `dotenv` to manage environment variables in the main process.
 
 ---
 
-_Last updated: 2026‑03‑20_
+_Last updated: 2026‑03‑21_

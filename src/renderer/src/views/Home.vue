@@ -112,17 +112,9 @@ const changeLanguage = (lang) => {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 2rem;
+  padding: var(--space-8);
   max-width: 800px;
   margin: 0 auto;
-
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 3rem;
-    width: 100%;
-  }
 
   &__header-content {
     text-align: left;
@@ -148,8 +140,8 @@ const changeLanguage = (lang) => {
 
   &__subtitle {
     font-size: 1.2rem;
-    color: #333333;
-    margin-top: 0.5rem;
+    color: var(--color-text-soft);
+    margin-top: var(--space-2);
   }
 
   &__content {
@@ -157,7 +149,7 @@ const changeLanguage = (lang) => {
   }
 
   &__providers-card {
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-8);
   }
 
   &__card-header {
@@ -165,22 +157,22 @@ const changeLanguage = (lang) => {
   }
 
   &__card-title {
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
     margin: 0;
   }
 
   &__card-description {
-    color: #333333;
-    margin-top: 0.5rem;
+    color: var(--color-text-soft);
+    margin-top: var(--space-2);
   }
 
   &__providers-list {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
-    padding: 1rem 0;
+    gap: var(--space-6);
+    padding: var(--space-4) 0;
   }
 
   &__provider-button {
@@ -189,7 +181,7 @@ const changeLanguage = (lang) => {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    padding: 0 2rem;
+    padding: 0 var(--space-8);
     transition: all 0.3s ease;
 
     &:hover {
@@ -200,44 +192,44 @@ const changeLanguage = (lang) => {
 
   &__provider-button-content {
     text-align: left;
-    margin-left: 1rem;
+    margin-left: var(--space-4);
   }
 
   &__provider-name {
-    font-size: 1.2rem;
-    font-weight: 600;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
   }
 
   &__provider-description {
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
     color: rgba(255, 255, 255, 0.8);
-    margin-top: 0.25rem;
+    margin-top: var(--space-1);
   }
 
   &__coming-soon {
-    margin-top: 1rem;
+    margin-top: var(--space-4);
   }
 
   &__card-footer {
     text-align: center;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #eee;
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-border-light);
   }
 
   &__footer-note {
-    color: #333333;
-    font-size: 0.9rem;
+    color: var(--color-text-soft);
+    font-size: var(--font-size-sm);
     margin: 0;
   }
 
   &__info {
-    margin-top: 2rem;
+    margin-top: var(--space-8);
   }
 
   &__info-card {
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
+    background-color: var(--color-gray-50);
+    border: 1px solid var(--color-border-light);
   }
 
   &__info-content {
@@ -245,42 +237,42 @@ const changeLanguage = (lang) => {
 
     h3 {
       margin: 0 0 1rem 0;
-      color: #000000;
+      color: var(--color-text);
     }
 
     p {
-      color: #333333;
-      line-height: 1.5;
-      margin-bottom: 1.5rem;
+      color: var(--color-text-soft);
+      line-height: var(--line-height-normal);
+      margin-bottom: var(--space-6);
     }
   }
 
   &__features {
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: var(--space-2);
   }
 
   &__footer {
-    margin-top: 3rem;
+    margin-top: var(--space-12);
     text-align: center;
   }
 
   &__version-info {
-    color: #666666;
-    font-size: 0.9rem;
+    color: var(--color-text-mute);
+    font-size: var(--font-size-sm);
   }
 
   // Responsive styles
   @media (max-width: 768px) {
-    padding: 1rem;
+    padding: var(--space-4);
 
     &__title {
       font-size: 2.5rem;
     }
 
     &__subtitle {
-      font-size: 1rem;
+      font-size: var(--font-size-base);
     }
 
     &__provider-button {
@@ -289,7 +281,7 @@ const changeLanguage = (lang) => {
     }
 
     &__card-title {
-      font-size: 1.3rem;
+      font-size: var(--font-size-xl);
     }
 
     &__features {
@@ -300,7 +292,7 @@ const changeLanguage = (lang) => {
     &__header {
       flex-direction: column;
       align-items: center;
-      gap: 1.5rem;
+      gap: var(--space-6);
     }
 
     &__header-content {
@@ -314,24 +306,24 @@ const changeLanguage = (lang) => {
 
   @media (max-width: 480px) {
     &__title {
-      font-size: 2rem;
+      font-size: var(--font-size-3xl);
     }
 
     &__header {
-      margin-bottom: 2rem;
+      margin-bottom: var(--space-8);
     }
 
     &__provider-button {
       height: 70px;
-      padding: 0 1.5rem;
+      padding: 0 var(--space-6);
     }
 
     &__provider-name {
-      font-size: 1.1rem;
+      font-size: var(--font-size-lg);
     }
 
     &__provider-description {
-      font-size: 0.85rem;
+      font-size: var(--font-size-sm);
     }
 
     &__language-select {
