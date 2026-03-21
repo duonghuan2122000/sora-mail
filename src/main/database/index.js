@@ -191,6 +191,7 @@ class Database {
       if (existingProviders.length === 0) {
         // Insert Gmail provider
         await this.db('providers').insert({
+          id: uuidv7(),
           name: 'gmail',
           display_name: 'Gmail',
           auth_type: 'oauth2',

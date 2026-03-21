@@ -86,6 +86,62 @@ const databaseApi = {
   migration: {
     migrateMockData: (accountId, folderId) =>
       ipcRenderer.invoke('migration:migrateMockData', { accountId, folderId })
+  },
+
+  // OAuth
+  oauth: {
+    // OAuth Flow
+    startGmail: () => ipcRenderer.invoke('oauth:startGmail'),
+    handleCallback: (url) => ipcRenderer.invoke('oauth:handleCallback', url),
+
+    // Account Management
+    getAccounts: () => ipcRenderer.invoke('oauth:getAccounts'),
+    getAccount: (accountId) => ipcRenderer.invoke('oauth:getAccount', accountId),
+    disconnectAccount: (accountId) => ipcRenderer.invoke('oauth:disconnectAccount', accountId),
+    checkAuth: (accountId) => ipcRenderer.invoke('oauth:checkAuth', accountId),
+    refreshToken: (accountId) => ipcRenderer.invoke('oauth:refreshToken', accountId),
+
+    // Gmail API
+    getGmailProfile: (accountId) => ipcRenderer.invoke('oauth:getGmailProfile', accountId),
+    getGmailLabels: (accountId) => ipcRenderer.invoke('oauth:getGmailLabels', accountId),
+    getGmailMessages: (accountId, maxResults) =>
+      ipcRenderer.invoke('oauth:getGmailMessages', { accountId, maxResults }),
+    getGmailMessage: (accountId, messageId) =>
+      ipcRenderer.invoke('oauth:getGmailMessage', { accountId, messageId }),
+
+    // Provider Configuration
+    getGmailProviderConfig: () => ipcRenderer.invoke('oauth:getGmailProviderConfig'),
+    updateGmailProviderConfig: (config) =>
+      ipcRenderer.invoke('oauth:updateGmailProviderConfig', config),
+
+    // Sync
+    syncAccount: (accountId) => ipcRenderer.invoke('oauth:syncAccount', accountId),
+    getSyncProgress: () => ipcRenderer.invoke('oauth:getSyncProgress'),
+    isSyncing: () => ipcRenderer.invoke('oauth:isSyncing'),
+
+    // Event Listeners
+    onOAuthSuccess: (callback) => ipcRenderer.on('oauth:success', (event, data) => callback(data)),
+    onOAuthError: (callback) => ipcRenderer.on('oauth:error', (event, data) => callback(data)),
+    onOAuthCancelled: (callback) =>
+      ipcRenderer.on('oauth:cancelled', (event, data) => callback(data)),
+    onCallbackSuccess: (callback) =>
+      ipcRenderer.on('oauth:callbackSuccess', (event, data) => callback(data)),
+    onCallbackError: (callback) =>
+      ipcRenderer.on('oauth:callbackError', (event, data) => callback(data)),
+    onSyncStarted: (callback) => ipcRenderer.on('sync:started', (event, data) => callback(data)),
+    onSyncCompleted: (callback) =>
+      ipcRenderer.on('sync:completed', (event, data) => callback(data)),
+    onSyncError: (callback) => ipcRenderer.on('sync:error', (event, data) => callback(data)),
+
+    // Remove Event Listeners
+    removeOAuthSuccess: () => ipcRenderer.removeAllListeners('oauth:success'),
+    removeOAuthError: () => ipcRenderer.removeAllListeners('oauth:error'),
+    removeOAuthCancelled: () => ipcRenderer.removeAllListeners('oauth:cancelled'),
+    removeCallbackSuccess: () => ipcRenderer.removeAllListeners('oauth:callbackSuccess'),
+    removeCallbackError: () => ipcRenderer.removeAllListeners('oauth:callbackError'),
+    removeSyncStarted: () => ipcRenderer.removeAllListeners('sync:started'),
+    removeSyncCompleted: () => ipcRenderer.removeAllListeners('sync:completed'),
+    removeSyncError: () => ipcRenderer.removeAllListeners('sync:error')
   }
 }
 

@@ -4,6 +4,11 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import database from './database/index.js'
 import './services/databaseService.js'
+import OAuthConfigService from './services/oauth/OAuthConfigService.js'
+import createOAuthIpcHandlers from './services/oauth/OAuthIpcHandlers.js'
+
+// OAuthIpcHandlers will be imported and initialized later
+let oauthIpcHandlers = null
 
 // Load environment variables
 import dotenv from 'dotenv'
@@ -60,6 +65,14 @@ function createWindow() {
     }
   })
 
+  // Set main window for OAuth IPC handlers
+  if (oauthIpcHandlers) {
+    oauthIpcHandlers.setMainWindow(mainWindow)
+    console.log('✅ OAuth IPC handlers connected to main window')
+  } else {
+    console.error('❌ OAuth IPC handlers not initialized')
+  }
+
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
@@ -81,7 +94,7 @@ function createWindow() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -96,9 +109,30 @@ app.whenReady().then(() => {
   ipcMain.on('ping', () => console.log('pong'))
 
   // Initialize database
-  database.initialize().catch((error) => {
+  await database.initialize().catch((error) => {
     console.error('Failed to initialize database:', error)
   })
+
+  // Load OAuth configuration from environment variables
+  try {
+    await OAuthConfigService.loadConfigFromEnv()
+  } catch (error) {
+    console.error('Failed to load OAuth config:', error)
+  }
+
+  // Initialize OAuth IPC handlers before creating window
+  console.log('🔧 Initializing OAuth services...')
+  try {
+    // Import and create OAuth IPC handlers with Electron dependencies
+    // const { createOAuthIpcHandlers } = await import('./services/oauth/OAuthIpcHandlers.js')
+    oauthIpcHandlers = createOAuthIpcHandlers({ BrowserWindow, shell }, ipcMain)
+    console.log('✅ OAuth IPC handlers initialized')
+  } catch (error) {
+    console.error('❌ Failed to initialize OAuth IPC handlers:', error)
+    // Fallback: register handlers directly
+    console.log('🔄 Falling back to direct handler registration...')
+    registerOAuthHandlersDirectly(ipcMain, { BrowserWindow, shell })
+  }
 
   createWindow()
 
@@ -120,3 +154,31 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+// Fallback function to register OAuth handlers directly
+function registerOAuthHandlersDirectly(ipcMain, electron) {
+  console.log('🔧 Registering OAuth handlers directly...')
+
+  // Simple handler for testing
+  ipcMain.handle('oauth:getAccounts', async () => {
+    console.log('📋 oauth:getAccounts handler called')
+    return {
+      success: true,
+      accounts: []
+    }
+  })
+
+  ipcMain.handle('oauth:getGmailProviderConfig', async () => {
+    console.log('📋 oauth:getGmailProviderConfig handler called')
+    return {
+      success: true,
+      config: {
+        clientId: '',
+        clientSecret: '',
+        redirectUri: 'http://localhost'
+      }
+    }
+  })
+
+  console.log('✅ Direct OAuth handlers registered')
+}
