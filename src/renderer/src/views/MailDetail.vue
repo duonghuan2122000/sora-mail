@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import {
   Menu as IconMenu,
   Message,
@@ -10,40 +10,44 @@ import {
   Star,
   Delete,
   User,
-  Setting
+  Setting,
+  ArrowLeft,
+  ArrowRight,
+  Document,
+  Folder
 } from '@element-plus/icons-vue'
-import { mails as mailData, folders, labels } from '@renderer/services/mailService'
+import { getMailById, mails, folders, labels } from '@renderer/services/mailService'
 
+const route = useRoute()
 const router = useRouter()
 
-const mailList = ref(mailData)
+const mailId = parseInt(route.params.id)
+const mail = computed(() => getMailById(mailId))
+
 const folderList = ref(folders)
 const labelList = ref(labels)
 const selectedFolder = ref('Inbox')
 const searchQuery = ref('')
 
 const goBack = () => {
-  router.push('/')
+  router.push('/mail')
 }
 
-const openMail = (mail) => {
-  router.push(`/mail/${mail.id}`)
-}
-
-const toggleStar = (mail) => {
-  mail.starred = !mail.starred
-}
-
-const deleteMail = (mail) => {
-  const index = mailList.value.findIndex((m) => m.id === mail.id)
-  if (index !== -1) {
-    mailList.value.splice(index, 1)
+const toggleStar = () => {
+  if (mail.value) {
+    mail.value.starred = !mail.value.starred
   }
 }
 
-onMounted(() => {
-  console.log('MailList mounted')
-})
+const deleteMail = () => {
+  if (mail.value) {
+    const index = mails.findIndex((m) => m.id === mail.value.id)
+    if (index !== -1) {
+      mails.splice(index, 1)
+      router.push('/mail')
+    }
+  }
+}
 </script>
 
 <template>
@@ -114,64 +118,84 @@ onMounted(() => {
         <!-- Toolbar -->
         <div class="sora-mail__toolbar">
           <div class="sora-mail__toolbar-left">
-            <el-checkbox />
-            <el-dropdown>
-              <el-button text>
-                <span>Select</span>
-              </el-button>
-            </el-dropdown>
+            <el-button :icon="ArrowLeft" text @click="goBack">Back</el-button>
             <el-button :icon="Refresh" text />
             <el-button :icon="More" text />
           </div>
           <div class="sora-mail__toolbar-right">
-            <span class="sora-mail__toolbar-info">
-              1-{{ mailList.length }} of {{ mailList.length }}
-            </span>
+            <el-button :icon="Document" text />
+            <el-button :icon="Folder" text />
+            <el-button :icon="Delete" text @click="deleteMail" />
             <el-button :icon="More" text />
           </div>
         </div>
 
-        <!-- Mail List -->
-        <div class="sora-mail__mail-list">
-          <div
-            v-for="mail in mailList"
-            :key="mail.id"
-            class="sora-mail__mail-item"
-            :class="{ 'sora-mail__mail-item--unread': mail.unread }"
-            @click="openMail(mail)"
-          >
-            <div class="sora-mail__mail-checkbox">
-              <el-checkbox />
-            </div>
-            <div class="sora-mail__mail-star" @click.stop="toggleStar(mail)">
-              <el-icon :color="mail.starred ? '#FBBC05' : '#ccc'">
-                <Star />
-              </el-icon>
-            </div>
-            <div class="sora-mail__mail-sender">
-              <span class="sora-mail__mail-sender-name">{{ mail.sender }}</span>
-              <span class="sora-mail__mail-sender-email">{{ mail.senderEmail }}</span>
-            </div>
-            <div class="sora-mail__mail-content">
-              <div class="sora-mail__mail-subject">
-                {{ mail.subject }}
-                <span v-if="mail.important" class="sora-mail__mail-important">Important</span>
-              </div>
-              <div class="sora-mail__mail-preview">{{ mail.preview }}</div>
-            </div>
-            <div class="sora-mail__mail-time">
-              <div class="sora-mail__mail-time-text">{{ mail.time }}</div>
+        <!-- Mail Detail -->
+        <div v-if="mail" class="sora-mail__mail-detail">
+          <div class="sora-mail__mail-header">
+            <div class="sora-mail__mail-subject-row">
+              <h1 class="sora-mail__mail-subject">{{ mail.subject }}</h1>
               <div class="sora-mail__mail-actions">
-                <el-button :icon="Delete" text @click.stop="deleteMail(mail)" />
+                <el-button :icon="Star" text @click="toggleStar">
+                  {{ mail.starred ? 'Unstar' : 'Star' }}
+                </el-button>
+                <el-button :icon="Refresh" text>Reply</el-button>
+                <el-button :icon="ArrowRight" text>Forward</el-button>
                 <el-button :icon="More" text />
               </div>
+            </div>
+            <div class="sora-mail__mail-sender-row">
+              <div class="sora-mail__mail-sender-info">
+                <el-avatar :size="40" :icon="User" class="sora-mail__mail-avatar" />
+                <div class="sora-mail__mail-sender-details">
+                  <div class="sora-mail__mail-sender-name">{{ mail.sender }}</div>
+                  <div class="sora-mail__mail-sender-email">{{ mail.senderEmail }}</div>
+                </div>
+              </div>
+              <div class="sora-mail__mail-time">
+                <div class="sora-mail__mail-date">{{ mail.date }}</div>
+                <div class="sora-mail__mail-time-text">{{ mail.time }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sora-mail__mail-body">
+            <p class="sora-mail__mail-preview">{{ mail.preview }}</p>
+            <div class="sora-mail__mail-content">
+              <!-- In a real app, this would be the full email content -->
+              <p>
+                This is the full content of the email. In a real application, this would contain the
+                complete email body with formatting, attachments, etc.
+              </p>
+              <p>For demonstration purposes, we're showing the preview text as the main content.</p>
+            </div>
+          </div>
+
+          <div v-if="false" class="sora-mail__mail-attachments">
+            <h3 class="sora-mail__attachments-title">Attachments</h3>
+            <div class="sora-mail__attachment-list">
+              <div class="sora-mail__attachment-item">
+                <div class="sora-mail__attachment-icon">📎</div>
+                <div class="sora-mail__attachment-info">
+                  <div class="sora-mail__attachment-name">document.pdf</div>
+                  <div class="sora-mail__attachment-size">2.4 MB</div>
+                </div>
+                <el-button text>Download</el-button>
+              </div>
+            </div>
+          </div>
+
+          <div class="sora-mail__mail-footer">
+            <div class="sora-mail__reply-actions">
+              <el-button type="primary" :icon="Refresh">Reply</el-button>
+              <el-button :icon="ArrowRight">Forward</el-button>
+              <el-button :icon="More">More</el-button>
             </div>
           </div>
         </div>
 
-        <!-- Empty state (optional) -->
-        <div v-if="mailList.length === 0" class="sora-mail__empty">
-          <el-empty description="No emails in this folder" />
+        <div v-else class="sora-mail__empty">
+          <el-empty description="Email not found" />
         </div>
       </main>
     </div>
@@ -389,133 +413,158 @@ onMounted(() => {
     gap: 0.5rem;
   }
 
-  &__toolbar-info {
-    font-size: 0.875rem;
-    color: #333333;
-  }
-
-  &__mail-list {
+  &__mail-detail {
     flex: 1;
     overflow-y: auto;
+    padding: 2rem;
   }
 
-  &__mail-item {
+  &__mail-header {
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__mail-subject-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  &__mail-subject {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #202124;
+    margin: 0;
+  }
+
+  &__mail-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  &__mail-sender-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__mail-sender-info {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #e0e0e0;
-    cursor: pointer;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: #f5f7f8;
-      box-shadow: inset 1px 0 0 #4285f4;
-    }
-
-    &--unread {
-      background-color: #f8f9fa;
-      font-weight: 600;
-
-      .sora-mail__mail-subject {
-        color: #202124;
-      }
-    }
   }
 
-  &__mail-checkbox {
-    flex-shrink: 0;
+  &__mail-avatar {
+    background-color: #e8f0fe;
+    color: #1967d2;
   }
 
-  &__mail-star {
-    flex-shrink: 0;
-    cursor: pointer;
-    padding: 0.25rem;
-    border-radius: 50%;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: #f1f3f4;
-    }
-  }
-
-  &__mail-sender {
-    flex-shrink: 0;
-    width: 200px;
+  &__mail-sender-details {
     display: flex;
     flex-direction: column;
   }
 
   &__mail-sender-name {
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: #202124;
-    margin-bottom: 0.125rem;
   }
 
   &__mail-sender-email {
-    font-size: 0.75rem;
-    color: #333333;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__mail-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  &__mail-subject {
     font-size: 0.875rem;
-    color: #202124;
-    margin-bottom: 0.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  &__mail-important {
-    font-size: 0.75rem;
-    color: #ea4335;
-    background-color: #fce8e6;
-    padding: 0.125rem 0.5rem;
-    border-radius: 4px;
-    font-weight: 600;
-  }
-
-  &__mail-preview {
-    font-size: 0.8125rem;
     color: #333333;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   &__mail-time {
-    flex-shrink: 0;
-    width: 120px;
     text-align: right;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.5rem;
+  }
+
+  &__mail-date {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #202124;
   }
 
   &__mail-time-text {
+    font-size: 0.875rem;
+    color: #333333;
+  }
+
+  &__mail-body {
+    line-height: 1.6;
+    color: #202124;
+  }
+
+  &__mail-preview {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    color: #333333;
+  }
+
+  &__mail-content {
+    font-size: 1rem;
+    color: #202124;
+  }
+
+  &__mail-attachments {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  &__attachments-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #202124;
+    margin: 0 0 1rem;
+  }
+
+  &__attachment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  &__attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+  }
+
+  &__attachment-icon {
+    font-size: 1.5rem;
+  }
+
+  &__attachment-info {
+    flex: 1;
+  }
+
+  &__attachment-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #202124;
+  }
+
+  &__attachment-size {
     font-size: 0.75rem;
     color: #333333;
   }
 
-  &__mail-actions {
-    display: flex;
-    gap: 0.25rem;
-    opacity: 0;
-    transition: opacity 0.2s;
+  &__mail-footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
   }
 
-  &__mail-item:hover &__mail-actions {
-    opacity: 1;
+  &__reply-actions {
+    display: flex;
+    gap: 1rem;
   }
 
   &__empty {
@@ -530,10 +579,6 @@ onMounted(() => {
 @media (max-width: 1024px) {
   .sora-mail__sidebar {
     width: 200px;
-  }
-
-  .sora-mail__mail-sender {
-    width: 150px;
   }
 }
 
@@ -562,12 +607,24 @@ onMounted(() => {
     }
   }
 
-  .sora-mail__mail-sender {
-    width: 120px;
+  .sora-mail__mail-detail {
+    padding: 1rem;
+  }
+
+  .sora-mail__mail-subject-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .sora-mail__mail-sender-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 
   .sora-mail__mail-time {
-    width: 80px;
+    text-align: left;
   }
 }
 </style>
