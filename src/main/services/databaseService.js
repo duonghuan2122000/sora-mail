@@ -7,6 +7,7 @@ import LabelModel from '../database/models/LabelModel.js'
 import MailModel from '../database/models/MailModel.js'
 import AttachmentModel from '../database/models/AttachmentModel.js'
 import FilterModel from '../database/models/FilterModel.js'
+import SettingsModel from '../database/models/SettingsModel.js'
 
 class DatabaseService {
   constructor() {
@@ -194,6 +195,24 @@ class DatabaseService {
     // Filter handlers
     ipcMain.handle('filters:getActiveFilters', async (event, accountId) => {
       return FilterModel.getActiveFilters(accountId)
+    })
+
+    // Settings handlers
+    ipcMain.handle('settings:get', async (event, key) => {
+      return SettingsModel.get(key)
+    })
+
+    ipcMain.handle('settings:set', async (event, key, value) => {
+      return SettingsModel.set(key, value)
+    })
+
+    // Theme handlers (specific shortcuts)
+    ipcMain.handle('get-theme', async () => {
+      return SettingsModel.get('theme') || 'light'
+    })
+
+    ipcMain.handle('set-theme', async (event, theme) => {
+      return SettingsModel.set('theme', theme)
     })
 
     // Migration handlers for mock data

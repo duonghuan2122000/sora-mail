@@ -117,4 +117,24 @@ const app = createApp(App)
 app.use(i18n)
 app.use(ElementPlus)
 app.use(router)
-app.mount('#app')
+
+// Load theme on startup
+const loadTheme = async () => {
+  try {
+    // Check if database API is available (it might not be in some contexts)
+    if (window.database && window.database.getTheme) {
+      const theme = await window.database.getTheme()
+      document.documentElement.setAttribute('data-theme', theme || 'light')
+      if (theme === 'dark') {
+        document.body.classList.add('dark')
+      }
+    }
+  } catch (error) {
+    console.error('Error loading theme on startup:', error)
+  }
+}
+
+// Apply theme before mounting
+loadTheme().then(() => {
+  app.mount('#app')
+})

@@ -82,6 +82,16 @@ const databaseApi = {
     getActiveFilters: (accountId) => ipcRenderer.invoke('filters:getActiveFilters', accountId)
   },
 
+  // Settings
+  settings: {
+    get: (key) => ipcRenderer.invoke('settings:get', key),
+    set: (key, value) => ipcRenderer.invoke('settings:set', key, value)
+  },
+
+  // Theme
+  getTheme: () => ipcRenderer.invoke('get-theme'),
+  setTheme: (theme) => ipcRenderer.invoke('set-theme', theme),
+
   // Migration
   migration: {
     migrateMockData: (accountId, folderId) =>

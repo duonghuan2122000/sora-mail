@@ -261,7 +261,7 @@ onMounted(() => {
         </div>
 
         <div class="sora-mail__sidebar-footer">
-          <el-button :icon="Setting" text>Settings</el-button>
+          <el-button :icon="Setting" text @click="router.push('/settings')">Settings</el-button>
         </div>
       </aside>
 
